@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /
+# When allowing crawling, remember to exclude /admin
+# Disallow: /admin

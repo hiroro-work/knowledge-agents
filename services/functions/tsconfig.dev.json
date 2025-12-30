@@ -1,0 +1,3 @@
+{
+  "include": ["eslint.config.js", ".prettierrc.cjs", "vitest.config.ts", "tests", "**/*.test.ts", "**/*.mock.ts"]
+}

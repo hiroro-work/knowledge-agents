@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+    <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4285F4"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="128" height="128" fill="url(#bg)"/>
+  
+  <!-- Robot Head -->
+  <rect x="32" y="32" width="64" height="51.2" rx="10.24" fill="#64748b"/>
+  
+  <!-- Left Eye -->
+  <circle cx="51.2" cy="52.48" r="6.4" fill="#60a5fa" opacity="0.3"/>
+  <circle cx="51.2" cy="52.48" r="6.4" fill="#60a5fa"/>
+  
+  <!-- Right Eye -->
+  <circle cx="76.8" cy="52.48" r="6.4" fill="#60a5fa" opacity="0.3"/>
+  <circle cx="76.8" cy="52.48" r="6.4" fill="#60a5fa"/>
+  
+  <!-- Antenna -->
+  <line x1="64" y1="32" x2="64" y2="19.2" stroke="#64748b" stroke-width="2.56" stroke-linecap="round"/>
+  <circle cx="64" cy="19.2" r="3.84" fill="#60a5fa"/>
+  
+  <!-- Container -->
+  <rect x="38.4" y="70.4" width="51.2" height="51.2" rx="6.4" fill="#334155"/>
+  
+  <!-- Book -->
+  <rect x="48.64" y="79.68" width="30.72" height="26.624" rx="2.56" fill="url(#bookGrad)"/>
+  
+  <!-- Book spine -->
+  <rect x="48.64" y="79.68" width="3.072" height="26.624" fill="#1e40af"/>
+  
+  <!-- Pages -->
+  <line x1="54.784" y1="86.336" x2="75.52" y2="86.336" stroke="#ffffff" stroke-width="1.92" opacity="0.8"/>
+  <line x1="54.784" y1="92.096" x2="75.52" y2="92.096" stroke="#ffffff" stroke-width="1.92" opacity="0.8"/>
+  <line x1="54.784" y1="97.856" x2="75.52" y2="97.856" stroke="#ffffff" stroke-width="1.92" opacity="0.8"/>
+  <line x1="54.784" y1="103.616" x2="75.52" y2="103.616" stroke="#ffffff" stroke-width="1.92" opacity="0.8"/>
+  
+  <!-- Knowledge sparkle -->
+  <circle cx="71.68" cy="84.736" r="5.12" fill="#F4B400"/>
+  <circle cx="71.68" cy="84.736" r="2.56" fill="#ffffff"/>
+  
+  <!-- Left Arm -->
+  <line x1="32" y1="68.096" x2="38.4" y2="80.128" stroke="#64748b" stroke-width="5.12" stroke-linecap="round"/>
+  
+  <!-- Right Arm -->
+  <line x1="96" y1="68.096" x2="89.6" y2="80.128" stroke="#64748b" stroke-width="5.12" stroke-linecap="round"/>
+</svg>
