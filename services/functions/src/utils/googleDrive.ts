@@ -124,10 +124,50 @@ export const getAllFiles = async (
   return results.flat();
 };
 
+type ChangesResult = {
+  readonly changes: readonly drive_v3.Schema$Change[];
+  readonly newStartPageToken: string | null;
+};
+
+type SharedDriveChangesParams = ReturnType<typeof getSharedDriveChangesParams>;
+
+/**
+ * Fetch all changes using pagination
+ */
+const fetchChanges = async (
+  drive: drive_v3.Drive,
+  initialPageToken: string,
+  sharedDriveParams: SharedDriveChangesParams,
+): Promise<ChangesResult> => {
+  const allChanges: drive_v3.Schema$Change[] = [];
+  let currentPageToken: string | null = initialPageToken;
+  let newStartPageToken: string | null = null;
+
+  while (currentPageToken) {
+    const response: { data: drive_v3.Schema$ChangeList } = await drive.changes.list({
+      pageToken: currentPageToken,
+      pageSize: 1000,
+      includeRemoved: true,
+      fields:
+        'newStartPageToken,nextPageToken,changes(fileId,removed,file(id,name,mimeType,modifiedTime,md5Checksum,size,parents))',
+      ...sharedDriveParams,
+    });
+
+    allChanges.push(...(response.data.changes ?? []));
+    newStartPageToken = response.data.newStartPageToken ?? newStartPageToken;
+    currentPageToken = response.data.nextPageToken ?? null;
+  }
+
+  return {
+    changes: allChanges,
+    newStartPageToken,
+  };
+};
+
 /**
  * Get changes using Google Drive Changes API (with pagination)
  */
-export const getChanges = async (drive: drive_v3.Drive, driveSource: DriveSource) => {
+export const getChanges = async (drive: drive_v3.Drive, driveSource: DriveSource): Promise<ChangesResult> => {
   const initialPageToken = driveSource.googleDriveSyncPageToken;
 
   if (!initialPageToken) {
@@ -137,34 +177,7 @@ export const getChanges = async (drive: drive_v3.Drive, driveSource: DriveSource
   const isSharedDrive = driveSource.googleDriveType === 'sharedDrive';
   const sharedDriveParams = getSharedDriveChangesParams(isSharedDrive, driveSource.googleDriveId ?? undefined);
 
-  const allChanges: drive_v3.Schema$Change[] = [];
-  let currentPageToken: string | null = initialPageToken;
-  let newStartPageToken: string | null = null;
-
-  // Fetch all pages (not using paginateAll because we need to get newStartPageToken)
-  while (currentPageToken) {
-    const response: { data: drive_v3.Schema$ChangeList } = await drive.changes.list({
-      pageToken: currentPageToken,
-      includeRemoved: true,
-      fields:
-        'newStartPageToken,nextPageToken,changes(fileId,removed,file(id,name,mimeType,modifiedTime,md5Checksum,size,parents))',
-      ...sharedDriveParams,
-    });
-
-    allChanges.push(...(response.data.changes ?? []));
-
-    if (response.data.nextPageToken) {
-      currentPageToken = response.data.nextPageToken;
-    } else {
-      newStartPageToken = response.data.newStartPageToken ?? null;
-      currentPageToken = null;
-    }
-  }
-
-  return {
-    changes: allChanges,
-    newStartPageToken,
-  };
+  return fetchChanges(drive, initialPageToken, sharedDriveParams);
 };
 
 /**
