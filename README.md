@@ -2,6 +2,54 @@
 
 A web application that integrates Google Drive documents with Gemini File Search Store, providing a knowledge base as MCP servers and Agent skills.
 
+## System Overview
+
+```mermaid
+flowchart LR
+    user["User"]
+
+    subgraph GoogleDrive["Google Drive"]
+        docs["Documents"]
+    end
+
+    subgraph GoogleCloud["Google Cloud"]
+        hosting["Firebase Hosting"]
+
+        subgraph App["Knowledge Agents (Cloud Run)"]
+            webui["Web UI"]
+            functions["Cloud Functions"]
+            firestore["Firestore"]
+        end
+
+        scheduler["Cloud Scheduler"]
+        tasks["Cloud Tasks"]
+        gemini["Gemini File Search Store"]
+    end
+
+    subgraph AIAgents["AI Agents"]
+        claude["Claude Code"]
+        codex["Codex"]
+        other["Others"]
+    end
+
+    user --> hosting
+    hosting --> webui
+
+    scheduler -->|"Periodic Sync"| functions
+    functions --> tasks
+    tasks -->|"Fetch Files"| docs
+    tasks -->|"Upload"| gemini
+
+    webui -->|"Agent Management"| firestore
+    webui -->|"Manual Sync"| functions
+
+    claude -->|"MCP / Agent Skill"| hosting
+    codex -->|"MCP / Agent Skill"| hosting
+    other -->|"MCP / Agent Skill"| hosting
+
+    App -->|"Query"| gemini
+```
+
 ## Prerequisites
 
 - Node.js (see `.node-version` for version)
