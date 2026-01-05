@@ -1,4 +1,5 @@
 import { agentFilesRef, agentRef as _agentRef, getCollectionData } from '@local/admin-shared';
+import { getErrorMessage } from '@local/shared';
 import { deleteAgentFileCompletely } from '../utils/agentFile.js';
 import { logger, onTaskDispatched } from '../utils/firebase/functions.js';
 import { getGeminiClient } from '../utils/gemini.js';
@@ -27,7 +28,7 @@ export const cleanupDriveSource = onTaskDispatched<CleanupDriveSourcePayload>(
       logger.error('cleanupDriveSource task retry over', {
         agentId,
         driveSourceId,
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       });
     },
   },
@@ -55,7 +56,7 @@ export const cleanupDriveSource = onTaskDispatched<CleanupDriveSourcePayload>(
 
     // Treat task as success even with partial failures (retrying would just fail the same files again)
     if (errorCount > 0) {
-      const errors = rejectedResults.map(({ reason }) => (reason instanceof Error ? reason.message : String(reason)));
+      const errors = rejectedResults.map(({ reason }) => getErrorMessage(reason));
       logger.warn('DriveSource cleanup completed with errors', {
         agentId,
         driveSourceId,

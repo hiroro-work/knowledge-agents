@@ -7,9 +7,6 @@ import type { drive_v3 } from 'googleapis';
 // Rate limiting for Google Drive API (limit concurrent requests)
 const DRIVE_API_CONCURRENCY = 50;
 
-/**
- * Get Google Drive API client
- */
 export const getDriveClient = (): drive_v3.Drive => {
   const auth = new GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/drive.readonly'],
@@ -58,7 +55,7 @@ export const getAllSubfolderIds = async (
       ...sharedDriveParams,
     });
 
-    const ids = (response.data.files ?? []).map((f) => f.id).filter((id): id is string => !!id);
+    const ids = response.data.files?.map(({ id }) => id).filter((id): id is string => !!id) ?? [];
     if (!response.data.nextPageToken) return ids;
 
     const moreIds = await fetchSubfolders(parentId, response.data.nextPageToken);
@@ -185,25 +182,17 @@ export const getChanges = async (drive: drive_v3.Drive, driveSource: DriveSource
  */
 export const getStartPageToken = async (drive: drive_v3.Drive, driveSource: DriveSource): Promise<string> => {
   const isSharedDrive = driveSource.googleDriveType === 'sharedDrive';
+  const sharedDriveParams =
+    isSharedDrive && driveSource.googleDriveId ? { driveId: driveSource.googleDriveId, supportsAllDrives: true } : {};
 
-  if (isSharedDrive && driveSource.googleDriveId) {
-    const response = await drive.changes.getStartPageToken({
-      driveId: driveSource.googleDriveId,
-      supportsAllDrives: true,
-    });
-    const token = response.data.startPageToken;
-    if (!token) {
-      throw new Error('Failed to get start page token');
-    }
-    return token;
-  } else {
-    const response = await drive.changes.getStartPageToken();
-    const token = response.data.startPageToken;
-    if (!token) {
-      throw new Error('Failed to get start page token');
-    }
-    return token;
+  const response = await drive.changes.getStartPageToken(sharedDriveParams);
+  const token = response.data.startPageToken;
+
+  if (!token) {
+    throw new Error('Failed to get start page token');
   }
+
+  return token;
 };
 
 /**
@@ -242,7 +231,7 @@ const exportWorkspaceFile = async (
   const params: drive_v3.Params$Resource$Files$Export = {
     fileId,
     mimeType: exportMimeType,
-    ...(isSharedDrive ? { supportsAllDrives: true } : {}),
+    ...(isSharedDrive && { supportsAllDrives: true }),
   };
 
   const response = await drive.files.export(params, {
@@ -259,7 +248,7 @@ const downloadRegularFile = async (drive: drive_v3.Drive, fileId: string, isShar
   const params: drive_v3.Params$Resource$Files$Get = {
     fileId,
     alt: 'media',
-    ...(isSharedDrive ? { supportsAllDrives: true } : {}),
+    ...(isSharedDrive && { supportsAllDrives: true }),
   };
 
   const response = await drive.files.get(params, {

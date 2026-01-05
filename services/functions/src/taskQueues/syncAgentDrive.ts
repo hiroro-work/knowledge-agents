@@ -6,6 +6,7 @@ import {
   syncSessionsRef,
   updateAgent,
 } from '@local/admin-shared';
+import { getErrorMessage } from '@local/shared';
 import { logger, onTaskDispatched, taskQueues } from '../utils/firebase/functions.js';
 import { getAllSubfolderIds, getChanges, getDriveClient } from '../utils/googleDrive.js';
 import type { SyncAgentFilePayload } from './syncAgentFile.js';
@@ -60,7 +61,6 @@ const syncDriveSource = async (
   });
 
   try {
-    // Get target folder and subfolder IDs
     const subfolderIds = await getAllSubfolderIds(
       drive,
       [targetFolderId],
@@ -128,7 +128,7 @@ const syncDriveSource = async (
       fileCount: fileChanges.length,
     });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorMessage = getErrorMessage(error);
     logger.error('syncDriveSource failed', { agentId, driveSourceId, error: errorMessage });
     await updateAgent(agentRef, {
       [`driveSources.${driveSourceId}.syncStatus`]: 'error',
@@ -160,7 +160,7 @@ export const syncAgentDrive = onTaskDispatched<SyncAgentDrivePayload>(
     onRetryOver: async ({ agentId }, error) => {
       logger.error('syncAgentDrive task retry over', {
         agentId,
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       });
     },
   },

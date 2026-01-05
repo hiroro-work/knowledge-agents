@@ -3,6 +3,7 @@
 import { createMcpHandler, withMcpAuth } from 'mcp-handler';
 import { z } from 'zod3';
 import { verifyAuthToken } from '@local/admin-shared';
+import { getErrorMessage } from '@local/shared';
 import { getSecret } from '~/server/firebase/secret';
 import { logger } from '~/server/logging';
 import { queryKnowledgeBase } from '~/server/utils/gemini';
@@ -35,7 +36,7 @@ const queryKnowledgeToolHandler = async (agent: Agent, question: string): Promis
   } catch (error) {
     await logger.error('query-knowledge-error', {
       agentId: agent.id,
-      error: error instanceof Error ? error.message : String(error),
+      error: getErrorMessage(error),
     });
     return {
       content: [
@@ -85,9 +86,6 @@ const createVerifyToken = (agent: Agent) => {
   };
 };
 
-/**
- * Build MCP endpoint base path from agent ID
- */
 const buildBasePath = (agentId: string): string => {
   return `/api/agents/${agentId}`;
 };

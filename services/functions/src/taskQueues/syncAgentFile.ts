@@ -8,6 +8,7 @@ import {
   syncSessionRef,
   Timestamp,
 } from '@local/admin-shared';
+import { getErrorMessage, getErrorStack } from '@local/shared';
 import { deleteAgentFileCompletely } from '../utils/agentFile.js';
 import { logger, onTaskDispatched } from '../utils/firebase/functions.js';
 import {
@@ -130,7 +131,7 @@ export const syncAgentFile = onTaskDispatched<SyncAgentFilePayload>(
     },
     onRetryOver: async (data, error) => {
       const { agentId, syncSessionId, file } = data;
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = getErrorMessage(error);
       logger.error('syncAgentFile task retry over', {
         agentId,
         syncSessionId,
@@ -138,7 +139,7 @@ export const syncAgentFile = onTaskDispatched<SyncAgentFilePayload>(
         fileId: file.id,
         mimeType: file.mimeType,
         error: errorMessage,
-        stack: error instanceof Error ? error.stack : undefined,
+        stack: getErrorStack(error),
       });
       await recordResult(agentId, syncSessionId, 'failed', file, errorMessage);
     },
@@ -227,8 +228,8 @@ export const syncAgentFile = onTaskDispatched<SyncAgentFilePayload>(
     } catch (error) {
       logger.error('File sync failed', {
         ...logContext,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
+        error: getErrorMessage(error),
+        stack: getErrorStack(error),
       });
       throw error;
     }

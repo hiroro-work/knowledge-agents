@@ -9,6 +9,7 @@ import {
 import { defaultDriveSourceSyncStatus, defaultGeminiModel, geminiModels } from '@local/shared';
 import { taskQueues } from '~/server/firebase/functions';
 import { getSecret } from '~/server/firebase/secret';
+import { validateDriveSourceParams } from '~/server/utils/driveSource';
 import { createFileSearchStore } from '~/server/utils/gemini';
 import type { GeminiModel, GoogleDriveType } from '@local/shared';
 import type { logger as loggerType } from '~/server/logging';
@@ -49,21 +50,14 @@ export const validateCreateAgentParams = (params: CreateAgentParams): void => {
   if (!name) {
     throw new Response('Agent name is required', { status: 400 });
   }
-  if (googleDriveType === 'sharedDrive' && !googleDriveId) {
-    throw new Response('Google Drive ID is required for shared drive', { status: 400 });
-  }
-  if (googleDriveType === 'myDrive' && !googleDriveFolderId) {
-    throw new Response('Google Drive Folder ID is required for My Drive', { status: 400 });
-  }
-  if (googleDriveType !== 'myDrive' && googleDriveType !== 'sharedDrive') {
-    throw new Response('Google Drive Type must be either "myDrive" or "sharedDrive"', { status: 400 });
-  }
   if (geminiModel) {
     const validGeminiModels = geminiModels.map((m) => m.value);
     if (!validGeminiModels.includes(geminiModel)) {
       throw new Response(`Gemini model must be one of: ${validGeminiModels.join(', ')}`, { status: 400 });
     }
   }
+
+  validateDriveSourceParams({ googleDriveType, googleDriveId, googleDriveFolderId });
 };
 
 /**

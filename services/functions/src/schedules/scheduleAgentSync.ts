@@ -11,7 +11,6 @@ export const scheduleAgentSync = onSchedule(
     timeZone: 'Asia/Tokyo',
   },
   async () => {
-    // Get all agents
     const agents = await getCollectionData(agentsRef());
     const { syncAgentDrive } = taskQueues();
     for (const agent of agents) {

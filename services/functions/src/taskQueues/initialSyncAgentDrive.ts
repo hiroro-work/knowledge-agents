@@ -6,6 +6,7 @@ import {
   syncSessionsRef,
   updateAgent,
 } from '@local/admin-shared';
+import { getErrorMessage } from '@local/shared';
 import { logger, onTaskDispatched, taskQueues } from '../utils/firebase/functions.js';
 import { getAllFiles, getDriveClient, getStartPageToken } from '../utils/googleDrive.js';
 import type { SyncAgentFilePayload } from './syncAgentFile.js';
@@ -22,7 +23,6 @@ const syncDriveSource = async (
   const isSharedDrive = driveSource.googleDriveType === 'sharedDrive';
   const agentId = agentRef.id;
 
-  // Start sync
   await updateAgent(agentRef, {
     [`driveSources.${driveSourceId}.syncStatus`]: 'syncing',
     [`driveSources.${driveSourceId}.syncErrorMessage`]: null,
@@ -36,7 +36,6 @@ const syncDriveSource = async (
 
   logger.info(`Fetched ${validFiles.length} files`, { agentId, driveSourceId });
 
-  // Complete immediately if no files to sync
   if (validFiles.length === 0) {
     await updateAgent(agentRef, {
       [`driveSources.${driveSourceId}.syncStatus`]: 'synced',
@@ -48,7 +47,6 @@ const syncDriveSource = async (
     return;
   }
 
-  // Create sync session
   const sessionsRef = syncSessionsRef({ parent: agentRef });
   const sessionRef = sessionsRef.doc();
   const syncSessionId = sessionRef.id;
@@ -73,7 +71,6 @@ const syncDriveSource = async (
     totalFiles: validFiles.length,
   });
 
-  // Enqueue sync task for each file
   const queues = taskQueues();
   for (const file of validFiles) {
     const payload: SyncAgentFilePayload = {
@@ -124,17 +121,17 @@ export const initialSyncAgentDrive = onTaskDispatched<InitialSyncAgentDrivePaylo
       maxConcurrentDispatches: 1,
     },
     onRetryOver: async ({ agentId, driveSourceId }, error) => {
+      const errorMessage = getErrorMessage(error);
       logger.error('initialSyncAgentDrive task retry over', {
         agentId,
         driveSourceId,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage,
       });
       if (!driveSourceId) {
         logger.error('driveSourceId is required but missing in onRetryOver', { agentId });
         return;
       }
       const agentRef = _agentRef(agentId);
-      const errorMessage = error instanceof Error ? error.message : String(error);
 
       await updateAgent(agentRef, {
         [`driveSources.${driveSourceId}.syncStatus`]: 'error',

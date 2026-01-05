@@ -1,4 +1,5 @@
 import { agentFilesRef, agentRef as _agentRef, getFirestore, syncSessionsRef } from '@local/admin-shared';
+import { getErrorMessage } from '@local/shared';
 import { logger, onDocumentDeleted } from '../../utils/firebase/functions.js';
 import { deleteFileSearchStore, getGeminiClient } from '../../utils/gemini.js';
 import type { Agent } from '@local/shared';
@@ -15,7 +16,7 @@ export const cleanupAgentResources = async (agent: Agent): Promise<void> => {
       logger.error('Failed to delete FileSearchStore', {
         agentId,
         storeId: geminiFileSearchStoreId,
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       });
     }
   }
@@ -28,7 +29,7 @@ export const cleanupAgentResources = async (agent: Agent): Promise<void> => {
   } catch (error) {
     logger.error('Failed to delete files subcollection', {
       agentId,
-      error: error instanceof Error ? error.message : String(error),
+      error: getErrorMessage(error),
     });
   }
 
@@ -39,7 +40,7 @@ export const cleanupAgentResources = async (agent: Agent): Promise<void> => {
   } catch (error) {
     logger.error('Failed to delete syncSessions subcollection', {
       agentId,
-      error: error instanceof Error ? error.message : String(error),
+      error: getErrorMessage(error),
     });
   }
 

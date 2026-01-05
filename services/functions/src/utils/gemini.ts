@@ -2,24 +2,15 @@ import { GoogleGenAI } from '@google/genai';
 import { env } from './env.js';
 import { getExportMimeType, isGoogleWorkspaceFile } from './googleDrive.js';
 
-/**
- * Get Gemini API key
- */
 const getGeminiApiKey = (): string => {
   return env('GEMINI_API_KEY');
 };
 
-/**
- * Get Gemini API client
- */
 export const getGeminiClient = (): GoogleGenAI => {
   const apiKey = getGeminiApiKey();
   return new GoogleGenAI({ apiKey });
 };
 
-/**
- * Create a File Search Store
- */
 export const createFileSearchStore = async (ai: GoogleGenAI, agentId: string): Promise<string> => {
   const fileSearchStore = await ai.fileSearchStores.create({
     config: { displayName: `agent-${agentId}` },

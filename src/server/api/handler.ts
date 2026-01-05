@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { getErrorMessage, getErrorStack } from '@local/shared';
 import { getDecodedIdToken } from '~/server/firebase/auth';
 import { logger as _logger } from '../logging';
 import type { DecodedIdToken } from '@local/admin-shared';
@@ -71,10 +72,10 @@ const apiHandler = <Request = DefaultRequest, Response = DefaultResponse>(
       return globalThis.Response.json(response ?? null);
     } catch (error) {
       logger ||= createApiLogger(request, null);
-      await logger.error(
-        `[ERROR][${request.method}] ${request.url}`,
-        error instanceof Error ? { error: error.message, stack: error.stack } : { error },
-      );
+      await logger.error(`[ERROR][${request.method}] ${request.url}`, {
+        error: getErrorMessage(error),
+        stack: getErrorStack(error),
+      });
       return error instanceof globalThis.Response
         ? globalThis.Response.json({ error: await error.text() }, { status: error.status })
         : globalThis.Response.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -123,10 +124,10 @@ const streamingApiHandler = <Request = DefaultRequest>(fn: StreamingApiHandlerFu
           await logger.info(`[END][${request.method}] ${request.url}`);
           controller.close();
         } catch (error) {
-          await logger.error(
-            `[ERROR][${request.method}] ${request.url}`,
-            error instanceof Error ? { error: error.message, stack: error.stack } : { error },
-          );
+          await logger.error(`[ERROR][${request.method}] ${request.url}`, {
+            error: getErrorMessage(error),
+            stack: getErrorStack(error),
+          });
           if (error instanceof globalThis.Response) {
             const errorText = await error.text();
             const errorData = JSON.stringify({ error: errorText });
