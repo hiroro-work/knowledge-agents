@@ -97,6 +97,12 @@ pnpm test:functions 'src/auth/_tests/beforeUserCreated.test.ts'
 
 # Firestore rules tests
 pnpm test:rules:firestore
+
+# Screenshot tests
+pnpm test:e2e 'tests/e2e/screenshots.spec.ts'
+
+# Update screenshots (when UI changes are intentional)
+pnpm test:e2e 'tests/e2e/screenshots.spec.ts' --update-snapshots=all
 ```
 
 ### Build and Deploy
@@ -217,6 +223,10 @@ Refer to configuration files for details:
 - Always run type check/lint/format after changes
   - `pnpm lint:fix`
   - `pnpm format`
+- When adding new UI (pages/modals/dialogs), add screenshot test cases to `tests/e2e/screenshots.spec.ts` first
+- After making UI changes, you must execute screenshot tests yourself (do not just recommend):
+  - If UI changes are obvious/intentional, directly update snapshots: `pnpm test:e2e 'tests/e2e/screenshots.spec.ts' --update-snapshots=all`
+  - If unsure whether UI changed, first run without flag to check: `pnpm test:e2e 'tests/e2e/screenshots.spec.ts'`
 
 ## Deployment
 

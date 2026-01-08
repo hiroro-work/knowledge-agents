@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests/e2e',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
@@ -13,7 +13,16 @@ export default defineConfig({
   reporter: 'html',
   expect: {
     timeout: 20000,
+    toHaveScreenshot: {
+      maxDiffPixelRatio: process.env.CI ? 0.05 : 0.01,
+      animations: 'disabled',
+      threshold: 0.2,
+      scale: 'css',
+    },
   },
+  snapshotDir: './docs/screenshots',
+  snapshotPathTemplate: '{snapshotDir}/{projectName}/{arg}{ext}',
+  updateSnapshots: 'missing',
   use: {
     baseURL: 'http://localhost:13000',
     trace: 'on-first-retry',
@@ -21,11 +30,11 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'desktop',
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'Mobile Safari',
+      name: 'mobile',
       use: { ...devices['iPhone 15 Pro Max'] },
     },
   ],
