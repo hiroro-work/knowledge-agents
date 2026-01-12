@@ -10,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   timeout: 60000,
-  reporter: 'html',
+  reporter: [['html', { open: 'never' }], ['list']],
   expect: {
     timeout: 20000,
     toHaveScreenshot: {
